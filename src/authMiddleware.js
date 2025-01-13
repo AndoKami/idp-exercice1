@@ -1,15 +1,15 @@
-import { getAuth } from 'firebase-admin/auth';
-
-export const verifyIdToken = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  if (!token) {
-    return res.status(401).send('Token requis');
-  }
-  try {
-    const decodedToken = await getAuth().verifyIdToken(token);
-    req.user = decodedToken;
-    next();
-  } catch (error) {
-    res.status(403).send('Token invalide');
-  }
-};
+const verifyToken = async (req, res, next) => {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ message: 'Token requis' });
+    }
+    const token = authHeader.split(' ')[1]; // Prend le token après "Bearer"
+    try {
+      const decodedToken = await getAuth().verifyIdToken(token);
+      req.user = decodedToken;
+      next();
+    } catch (error) {
+      res.status(403).json({ message: 'Token invalide', error: error.message });
+    }
+  };
+  
